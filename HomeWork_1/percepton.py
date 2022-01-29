@@ -5,42 +5,43 @@ from sklearn.metrics import accuracy_score
 
 class Perceptron(object):
      
-    def __init__(self, n_iterations=100, random_state=1, learning_rate=0.01):
-        self.n_iterations = n_iterations
-        self.random_state = random_state
-        self.learning_rate = learning_rate
+    def __init__(self, max_iter=100, lr=0.01):
+        self.max_iter = max_iter
+        self.lr = lr
 
-    def fit(self, X, y):
-        rgen = np.random.RandomState(self.random_state)
-        self.coef_ = rgen.normal(loc=0.0, scale=0.01, size=1 + X.shape[1])
-        print(self.coef_)
-        #self.coef_ = np.array([0.25,0.75,0])
-        import pdb;pdb.set_trace()
+    def fit(self, samples, label):
+        rgen = np.random.RandomState(1)
+        self.weights = rgen.normal(loc=0.0, scale=0.01, size=1 + X.shape[1])
+        print(self.weights)
+        #self.weights = np.array([0.25,0.75,0])
+        
         last_loss = 1
-        for i in range(self.n_iterations):
+        for i in range(self.max_iter):
             predictions = []
-            for xi, expected_value in zip(X, y):
-                predicted_value = self.predict(xi)
-                self.coef_[1:] = self.coef_[1:] + self.learning_rate * (expected_value - predicted_value) * xi
-                self.coef_[0] = self.coef_[0] + self.learning_rate * (expected_value - predicted_value) * 1
-                predictions.append(predicted_value)
+            for sample, true_value in zip(samples, labels):
+                hypothesis = self.predict(xi)
+                self.weights[1:] = self.weights[1:] + self.lr * (true_value - hypothesis) * sample
+                self.weights[0] = self.weights[0] + self.lr * (true_value - hypothesis) * 1
+                predictions.append(hypothesis)
             loss = accuracy_score(predictions, y)
             temp = abs(last_loss - loss)
             last_loss = loss
-            print(self.coef_)
+            print(self.weights)
             if temp <= 0.001:
                 break
             
-
-        return self.coef_, i
+        return self.weights, i
      
+    def predict(self, X):
+        return self.activation_function(X)
 
     def net_input(self, X):
-            weighted_sum = np.dot(X, self.coef_[1:]) + self.coef_[0]
+            weighted_sum = np.dot(X, self.weights[1:]) + self.weights[0]
             return weighted_sum
      
 
     def activation_function(self, X):
+     #defining the activation function
             weighted_sum = self.net_input(X)
             return np.where(weighted_sum >= 0.0, 1, 0)
      
